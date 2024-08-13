@@ -1,0 +1,90 @@
+diff --git a/mediapipe/tasks/web/rollup.config.mjs b/mediapipe/tasks/web/rollup.config.mjs
+index 3b51195..e5106bb 100644
+--- a/mediapipe/tasks/web/rollup.config.mjs
++++ b/mediapipe/tasks/web/rollup.config.mjs
+@@ -6,6 +6,6 @@ export default {
+   plugins: [
+     resolve(),
+     commonjs(),
+-    terser()
++//    terser()
+   ]
+ }
+diff --git a/mediapipe/tasks/web/vision/core/image_shader_context.ts b/mediapipe/tasks/web/vision/core/image_shader_context.ts
+index 68fd4c0..c6bd9a3 100644
+--- a/mediapipe/tasks/web/vision/core/image_shader_context.ts
++++ b/mediapipe/tasks/web/vision/core/image_shader_context.ts
+@@ -29,6 +29,7 @@ const FRAGMENT_SHADER = `
+   uniform sampler2D inputTexture;
+   void main() {
+     gl_FragColor = texture2D(inputTexture, vTex);
++    gl_FragColor.a = gl_FragColor.r;
+   }
+  `;
+ 
+diff --git a/mediapipe/tasks/web/vision/image_segmenter/image_segmenter.ts b/mediapipe/tasks/web/vision/image_segmenter/image_segmenter.ts
+index 13a0dc6..b20cd85 100644
+--- a/mediapipe/tasks/web/vision/image_segmenter/image_segmenter.ts
++++ b/mediapipe/tasks/web/vision/image_segmenter/image_segmenter.ts
+@@ -23,6 +23,7 @@ import {SegmenterOptions as SegmenterOptionsProto} from '../../../../tasks/cc/vi
+ import {WasmFileset} from '../../../../tasks/web/core/wasm_fileset';
+ import {ImageProcessingOptions} from '../../../../tasks/web/vision/core/image_processing_options';
+ import {MPMask} from '../../../../tasks/web/vision/core/mask';
++import {MPImage} from '../../../../tasks/web/vision/core/image';
+ import {
+   VisionGraphRunner,
+   VisionTaskRunner,
+@@ -67,7 +68,7 @@ export type ImageSegmenterCallback = (result: ImageSegmenterResult) => void;
+ /** Performs image segmentation on images. */
+ export class ImageSegmenter extends VisionTaskRunner {
+   private categoryMask?: MPMask;
+-  private confidenceMasks?: MPMask[];
++  private confidenceMasks?: MPImage[];
+   private qualityScores?: number[];
+   private labels: string[] = [];
+   private userCallback?: ImageSegmenterCallback;
+@@ -471,9 +472,9 @@ export class ImageSegmenter extends VisionTaskRunner {
+         CONFIDENCE_MASKS_STREAM,
+         (masks, timestamp) => {
+           this.confidenceMasks = masks.map((wasmImage) =>
+-            this.convertToMPMask(
++            this.convertToMPImage(
+               wasmImage,
+-              /* interpolateValues= */ true,
++              // /* interpolateValues= */ true,
+               /* shouldCopyData= */ !this.userCallback,
+             ),
+           );
+diff --git a/mediapipe/tasks/web/vision/image_segmenter/image_segmenter_result.ts b/mediapipe/tasks/web/vision/image_segmenter/image_segmenter_result.ts
+index dc29979..79c52b3 100644
+--- a/mediapipe/tasks/web/vision/image_segmenter/image_segmenter_result.ts
++++ b/mediapipe/tasks/web/vision/image_segmenter/image_segmenter_result.ts
+@@ -15,6 +15,7 @@
+  */
+ 
+ import {MPMask} from '../../../../tasks/web/vision/core/mask';
++import {MPImage} from '../../../../tasks/web/vision/core/image';
+ 
+ /** The output result of ImageSegmenter. */
+ export class ImageSegmenterResult {
+@@ -25,7 +26,7 @@ export class ImageSegmenterResult {
+        * confidence, usually in the [0, 1] range.
+        * @export
+        */
+-      readonly confidenceMasks?: MPMask[],
++      readonly confidenceMasks?: MPImage[],
+       /**
+        * A category mask represented as a `Uint8ClampedArray` or
+        * `WebGLTexture`-backed `MPImage` where each pixel represents the class
+diff --git a/tsconfig.json b/tsconfig.json
+index 8074aed..94ff558 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -1,6 +1,6 @@
+ {
+   "compilerOptions": {
+-    "target": "es2017",
++    "target": "es2020",
+     "module": "commonjs",
+     "lib": ["ES2021", "dom"],
+     "declaration": true,
