@@ -1,4 +1,6 @@
 set -e
+GIT_REVISION=5659fd3d28d9d744fdeb4635ed60899c38527a2d
+
 function checkBazel {
     if [ -z "`which bazel`" ]; then
         echo -n "You need to install Bazelisk first. For Debian, you can download a release binary from the Bazelisk\n\
@@ -23,6 +25,8 @@ elif [ "$1" == "fetch" ]; then
     if [ ! -d "./mediapipe" ]; then
         rm ./.patched
         git clone --depth 1 https://github.com/google/mediapipe.git
+        git fetch --depth=1 origin $GIT_REVISION
+        git checkout -f $GIT_REVISION
     else
         echo -e "\e[93;1mMediapipe repo already cloned\e[0m"
     fi
@@ -47,6 +51,7 @@ elif [ "$1" == "npm" ]; then
     echo "==== NPM package generated in ./npm-pkg ===="
 elif [ "$1" == "clean" ]; then
     bazel clean
+    rm -rf mediapipe/bazel-bin/mediapipe/tasks/web
 else
     echo "Invalid command '$1'"
     exit 2
