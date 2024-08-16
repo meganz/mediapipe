@@ -15,7 +15,7 @@ if [ -z "$1" ]; then
        deps: Lists the names of the (debian) packages for the
              required dependencies. Convenient for use with apt install\n\
        fetch: Clones the mediapipe repository and patches it\n\
-       native: Builds the native mediapipe framework\n\
+       native: Builds the native mediapipe framework and a test app\n\
        npm: Builds the node module, building the Mediapipe framework if not done already\n\
        clean: Clear everything to start from scratch"
     exit 1
