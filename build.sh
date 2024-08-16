@@ -13,8 +13,8 @@ if [ -z "$1" ]; then
        deps: Lists the names of the (debian) packages for the
              required dependencies. Convenient for use with apt install\n\
        fetch: Clones the mediapipe repository and patches it\n\
-       build-mp: Builds the native mediapipe framework\n\
-       build: Builds the node module, building the Mediapipe framework if not done already\n\
+       native: Builds the native mediapipe framework\n\
+       npm: Builds the node module, building the Mediapipe framework if not done already\n\
        clean: Clear everything to start from scratch"
     exit 1
 elif [ "$1" == "deps" ]; then
@@ -34,14 +34,22 @@ elif [ "$1" == "fetch" ]; then
     else
         echo -e "\e[93;1mMediapipe repo already patched\e[0m"
     fi
-elif [ "$1" == "build-mp" ]; then
+elif [ "$1" == "native" ]; then
     checkBazel
     cd mediapipe
     bazel run --copt -DMESA_EGL_NO_X11_HEADERS --copt -DEGL_NO_X11 mediapipe/examples/desktop/hello_world:hello_world
-elif [ "$1" == "build" ]; then
+elif [ "$1" == "npm" ]; then
     checkBazel
+    rm -f ./npm-pkg
     cd mediapipe
     bazel build mediapipe/tasks/web/vision:vision_pkg
+    ln -s ./mediapipe/bazel-bin/mediapipe/tasks/web/vision/vision_pkg ../npm-pkg
+    echo "==== NPM package generated in ./npm-pkg ===="
+elif [ "$1" == "clean" ]; then
+    bazel clean
+else
+    echo "Invalid command '$1'"
+    exit 2
 fi
 
 echo -e "\e[32;1mDone\e[0m"
