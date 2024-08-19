@@ -23,7 +23,7 @@ elif [ "$1" == "deps" ]; then
     echo libopencv-video-dev libopencv-contrib-dev mesa-common-dev libegl1-mesa-dev libgles2-mesa-dev
 elif [ "$1" == "fetch" ]; then
     if [ ! -d "./mediapipe" ]; then
-        rm ./.patched
+        rm -f ./.patched
         git clone --depth 1 https://github.com/google/mediapipe.git
         git fetch --depth=1 origin $GIT_REVISION
         git checkout -f $GIT_REVISION
