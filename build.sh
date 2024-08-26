@@ -1,4 +1,6 @@
+#!/bin/bash
 set -e
+
 GIT_REVISION=5659fd3d28d9d744fdeb4635ed60899c38527a2d
 
 function checkBazel {
@@ -11,27 +13,32 @@ function checkBazel {
 }
 
 if [ -z "$1" ]; then
+    echo "This is a script to build the modified js version Mediapipe, as used in Mega"
     echo -e "Please specify one of the commands: \n\
        deps: Lists the names of the (debian) packages for the
-             required dependencies. Convenient for use with apt install\n\
+             required dependencies. Convenient for use with apt install \`build.sh deps\`\n\
        fetch: Clones the mediapipe repository and patches it\n\
        native: Builds the native mediapipe framework and a test app\n\
-       npm: Builds the node module, building the Mediapipe framework if not done already\n\
+       npm: Builds the modified mediapipe/vision nodejs module\n\
        clean: Clear everything to start from scratch"
     exit 1
 elif [ "$1" == "deps" ]; then
     echo libopencv-video-dev libopencv-contrib-dev mesa-common-dev libegl1-mesa-dev libgles2-mesa-dev
+    exit 0
 elif [ "$1" == "fetch" ]; then
     if [ ! -d "./mediapipe" ]; then
         rm -f ./.patched
-        git clone --depth 1 https://github.com/google/mediapipe.git
+        mkdir ./mediapipe
+        cd ./mediapipe
+        git init --initial-branch=master
+        git remote add origin https://github.com/google/mediapipe.git
         git fetch --depth=1 origin $GIT_REVISION
-        git checkout -f $GIT_REVISION
+        git checkout -f FETCH_HEAD
     else
+        cd ./mediapipe
         echo -e "\e[93;1mMediapipe repo already cloned\e[0m"
     fi
     if [ ! -f "./.patched" ]; then
-        cd mediapipe
         echo "Patching Mediapipe..."
         git apply < ../mega.patch
         touch ../.patched
