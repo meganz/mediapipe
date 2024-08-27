@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+# set -x
 
 GIT_REVISION=5659fd3d28d9d744fdeb4635ed60899c38527a2d
 
@@ -51,10 +52,12 @@ elif [ "$1" == "native" ]; then
     bazel run --copt -DMESA_EGL_NO_X11_HEADERS --copt -DEGL_NO_X11 mediapipe/examples/desktop/hello_world:hello_world
 elif [ "$1" == "npm" ]; then
     checkBazel
-    rm -f ./npm-pkg
+    rm -rf ./npm-pkg
     cd mediapipe
     bazel build mediapipe/tasks/web/vision:vision_pkg
-    ln -s ./mediapipe/bazel-bin/mediapipe/tasks/web/vision/vision_pkg ../npm-pkg
+    mkdir ../npm-pkg
+    cp ./bazel-bin/mediapipe/tasks/web/vision/vision_pkg/{package.json,README.md,vision_bundle.mjs,vision_bundle.mjs.map,wasm/vision_wasm_internal.js,wasm/vision_wasm_internal.wasm}\
+        ../npm-pkg
     echo "==== NPM package generated in ./npm-pkg ===="
 elif [ "$1" == "clean" ]; then
     bazel clean
