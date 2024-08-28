@@ -58,6 +58,7 @@ elif [ "$1" == "npm" ]; then
     mkdir ../npm-pkg
     cp ./bazel-bin/mediapipe/tasks/web/vision/vision_pkg/{package.json,README.md,vision_bundle.mjs,vision_bundle.mjs.map,wasm/vision_wasm_internal.js,wasm/vision_wasm_internal.wasm}\
         ../npm-pkg
+    ln -s ./vision.d.ts ../npm-pkg
     echo "==== NPM package generated in ./npm-pkg ===="
 elif [ "$1" == "clean" ]; then
     bazel clean
