@@ -5,6 +5,7 @@ set -e
 GIT_REVISION=5659fd3d28d9d744fdeb4635ed60899c38527a2d
 BAZEL='bazel'
 SCRIPTDIR="$PWD"
+
 function checkBazel {
     if [ -z "`which bazel`" ]; then
         if [ ! -f "$SCRIPTDIR/bazel" ]; then
@@ -19,7 +20,17 @@ function checkBazel {
         echo "Using globally installed Bazel/Bazelisk, present in your path"
     fi
 }
-
+function checkGitVersion {
+    minver="2.28.0"
+    ver=`git --version`
+    if (echo a version $minver; $ver) | sort -Vk3 | tail -1 | grep -q git
+    then
+    :
+    else
+        echo -e "Your git version $ver is too old\nMinimum version supported is $minver"
+        exit 1
+    fi
+}
 if [ -z "$1" ]; then
     echo "This is a script to build the modified js version Mediapipe, as used in Mega"
     echo -e "Please specify one of the commands: \n\
@@ -35,6 +46,7 @@ elif [ "$1" == "deps" ]; then
     exit 0
 elif [ "$1" == "fetch" ]; then
     if [ ! -d "./mediapipe" ]; then
+        checkGitVersion
         rm -f ./.patched
         mkdir ./mediapipe
         cd ./mediapipe
