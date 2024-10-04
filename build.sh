@@ -3,13 +3,20 @@ set -e
 # set -x
 
 GIT_REVISION=5659fd3d28d9d744fdeb4635ed60899c38527a2d
-
+BAZEL='bazel'
+SCRIPTDIR="$PWD"
 function checkBazel {
     if [ -z "`which bazel`" ]; then
-        echo -n "You need to install Bazelisk first. For Debian, you can download a release binary from the Bazelisk\n\
-             Github repo, i.e. https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64\n\
-            and run it within the Bazel project dir"
-        exit 1
+        if [ ! -f "$SCRIPTDIR/bazel" ]; then
+            echo -n "You don't have Bazel neither in your path nor locally. Downloading bazelisk to current dir..."
+            wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -O ./bazel
+            chmod a+x ./bazel
+        else
+            echo "Using binary of Bazel/Bazelisk present in current dir"
+        fi
+        BAZEL="$SCRIPTDIR/bazel"
+    else
+        echo "Using globally installed Bazel/Bazelisk, present in your path"
     fi
 }
 
@@ -49,19 +56,20 @@ elif [ "$1" == "fetch" ]; then
 elif [ "$1" == "native" ]; then
     checkBazel
     cd mediapipe
-    bazel run --copt -DMESA_EGL_NO_X11_HEADERS --copt -DEGL_NO_X11 mediapipe/examples/desktop/hello_world:hello_world
+    $BAZEL run --copt -DMESA_EGL_NO_X11_HEADERS --copt -DEGL_NO_X11 mediapipe/examples/desktop/hello_world:hello_world
 elif [ "$1" == "npm" ]; then
     checkBazel
     rm -rf ./npm-pkg
     cd mediapipe
-    bazel build mediapipe/tasks/web/vision:vision_pkg
+    $BAZEL build mediapipe/tasks/web/vision:vision_pkg
     mkdir ../npm-pkg
     cp ./bazel-bin/mediapipe/tasks/web/vision/vision_pkg/{package.json,README.md,vision_bundle.mjs,vision_bundle.mjs.map,wasm/vision_wasm_internal.js,wasm/vision_wasm_internal.wasm}\
         ../npm-pkg
     ln -s ../vision.d.ts ../npm-pkg
     echo "==== NPM package generated in ./npm-pkg ===="
 elif [ "$1" == "clean" ]; then
-    bazel clean
+    checkBazel
+    $BAZEL clean
     rm -rf mediapipe/bazel-bin/mediapipe/tasks/web
 else
     echo "Invalid command '$1'"
