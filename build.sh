@@ -10,7 +10,7 @@ function checkBazel {
     if [ -z "`which bazel`" ]; then
         if [ ! -f "$SCRIPTDIR/bazel" ]; then
             echo -n "You don't have Bazel neither in your path nor locally. Downloading bazelisk to current dir..."
-            wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -O ./bazel
+            wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64 -O ./bazel
             chmod a+x ./bazel
         else
             echo "Using binary of Bazel/Bazelisk present in current dir"
